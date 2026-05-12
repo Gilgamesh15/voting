@@ -8,15 +8,17 @@ DROP TABLE IF EXISTS poll_options CASCADE;
 DROP TABLE IF EXISTS polls CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 -- =========================================
 -- USERS TABLE
 -- =========================================
 
 CREATE TABLE users (
-    id INTEGER PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     username VARCHAR(30) NOT NULL UNIQUE,
-    email VARCHAR(254) NOT NULL UNIQUE,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -26,12 +28,12 @@ CREATE TABLE users (
 -- =========================================
 
 CREATE TABLE polls (
-    id INTEGER PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
     title VARCHAR(120) NOT NULL,
     description TEXT,
 
-    created_by INTEGER NOT NULL,
+    created_by UUID NOT NULL,
 
     status VARCHAR(10) NOT NULL DEFAULT 'active',
 
@@ -52,9 +54,9 @@ CREATE TABLE polls (
 -- =========================================
 
 CREATE TABLE poll_options (
-    id INTEGER PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    poll_id INTEGER NOT NULL,
+    poll_id UUID NOT NULL,
 
     option_text VARCHAR(100) NOT NULL,
 
@@ -71,11 +73,11 @@ CREATE TABLE poll_options (
 -- =========================================
 
 CREATE TABLE votes (
-    id INTEGER PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    user_id INTEGER NOT NULL,
-    poll_id INTEGER NOT NULL,
-    option_id INTEGER NOT NULL,
+    user_id UUID NOT NULL,
+    poll_id UUID NOT NULL,
+    option_id UUID NOT NULL,
 
     voted_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -101,7 +103,6 @@ CREATE TABLE votes (
 -- =========================================
 -- INDEXES
 -- =========================================
-/*
 CREATE INDEX idx_polls_created_by
     ON polls(created_by);
 
@@ -113,4 +114,6 @@ CREATE INDEX idx_votes_user_id
 
 CREATE INDEX idx_votes_option_id
     ON votes(option_id);
-*/
+
+CREATE INDEX idx_votes_poll_id
+    ON votes(poll_id);
