@@ -1,0 +1,3 @@
+users = []
+polls = []
+votes = []
